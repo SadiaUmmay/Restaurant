@@ -1,13 +1,18 @@
 import login from "../../assets/others/authentication2.png"
 import { useForm } from "react-hook-form"
 
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { CiFacebook } from "react-icons/ci";
 import { FaGoogle } from "react-icons/fa";
 import { AiOutlineGithub } from "react-icons/ai";
 import "../login/Login";
 import logo from "../../assets/logo.png"
+import { useContext } from "react";
+import { AuthContext } from "../../providers/AuthProvider";
+import Swal from "sweetalert2";
 const SignUp = () => {
+  const navigate = useNavigate()
+  const {createUser} = useContext(AuthContext)
   const {
     register,
     handleSubmit,
@@ -20,6 +25,20 @@ const SignUp = () => {
       name: data.name,
       email: data.email
     }
+    createUser(data.email, data.password)
+    .then(res=>{
+      const user = res.user;
+      if(user){
+        Swal.fire({
+          position: "top-center",
+          icon: "success",
+          title: "User Created Successfully",
+          showConfirmButton: false,
+          timer: 1500
+        });
+        navigate('/')
+      }
+    })
     var storage = localStorage.setItem("user", JSON.stringify(user));
     console.log(storage)
   }
