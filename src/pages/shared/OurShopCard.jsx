@@ -2,8 +2,11 @@ import { useContext } from "react";
 import PrimaryBtn from "../../components/PrimaryBtn";
 import { AuthContext } from "../../providers/AuthProvider";
 import usePublic from "../../Hooks/usePublic";
+import Swal from "sweetalert2";
+import usecart from "../../Hooks/usecart";
 
 const OurShopCard = ({ food }) => {
+  const [, refetch] = usecart()
   const axiosPublic = usePublic()
   const { user } = useContext(AuthContext)
   // console.log(user?.email)
@@ -16,8 +19,18 @@ const OurShopCard = ({ food }) => {
       image,
       price
     }
-    axiosPublic.post('/order', foodData)
+    axiosPublic.post('/carts', foodData)
     .then(res=>{
+      if(res.data.acknowledged){
+        Swal.fire({
+          position: "top-center",
+          icon: "success",
+          title: `${name} add to cart successfully`,
+          showConfirmButton: false,
+          timer: 1500
+        });
+        refetch()
+      }
       console.log(res)
     })
     console.log(foodData)
