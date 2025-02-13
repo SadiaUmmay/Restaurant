@@ -1,9 +1,42 @@
+import { FaTrashAlt } from "react-icons/fa";
 import usecart from "../../../Hooks/usecart";
+import usePublic from "../../../Hooks/usePublic";
+import Swal from "sweetalert2";
 
 const Cart = () => {
-  const [cart] = usecart()
-  const totalPrice = cart.reduce((total, totalPrice) => total+ totalPrice.price, 0)
-  console.log(totalPrice)
+  const [cart, refetch] = usecart()
+  const axiosPublic = usePublic()
+  const totalPrice = cart.reduce((total, totalPrice) => total+ totalPrice.price, 0);
+  const handleRemoveFood= (id)=>{
+    Swal.fire({
+      title: "Are you sure?",
+      text: "You won't be able to revert this!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Yes, delete it!"
+    }).then((result) => {
+      if (result.isConfirmed) {
+       axiosPublic.delete(`/carts/${id}`)
+       .then(res=>{
+        if(res.data.acknowledged){
+          Swal.fire({
+            position: "top-center",
+            icon: "success",
+            title: "Deleted Successfully",
+            showConfirmButton: false,
+            timer: 1500
+          });
+        }
+        refetch()
+        console.log(res)
+       })
+      }
+    });
+    console.log(id)
+  }
+ 
     return (
       <div>
       <div className="flex gap-56 mt-10 ml-2">
@@ -18,49 +51,52 @@ const Cart = () => {
     <thead>
       <tr>
         <th>
-          <label>
-            <input type="checkbox" className="checkbox" />
-          </label>
+         #SL
         </th>
+        <th>Image</th>
         <th>Name</th>
-        <th>Job</th>
-        <th>Favorite Color</th>
+        <th>Price</th>
+        <th>Action</th>
+        
+       
         <th></th>
       </tr>
     </thead>
     <tbody>
       {/* row 1 */}
-      <tr>
+      {
+        cart.map((item, index)=>
+          <tr>
         <th>
-          <label>
-            <input type="checkbox" className="checkbox" />
-          </label>
+         {index + 1}
         </th>
         <td>
           <div className="flex items-center gap-3">
             <div className="avatar">
               <div className="mask mask-squircle h-12 w-12">
                 <img
-                  src="https://img.daisyui.com/images/profile/demo/2@94.webp"
-                  alt="Avatar Tailwind CSS Component" />
+                  src={item.image}
+                  alt={item.name} />
               </div>
             </div>
-            <div>
-              <div className="font-bold">Hart Hagerty</div>
-              <div className="text-sm opacity-50">United States</div>
-            </div>
+           
           </div>
         </td>
         <td>
-          Zemlak, Daniel and Leannon
-          <br />
-          <span className="badge badge-ghost badge-sm">Desktop Support Technician</span>
-        </td>
-        <td>Purple</td>
+         {item.name}
+         </td>
+         <td>
+         $ {item.price}
+         </td>
         <th>
-          <button className="btn btn-ghost btn-xs">details</button>
+          <button onClick={()=>handleRemoveFood(item._id)} className="btn btn-ghost btn-xs">
+            <FaTrashAlt className="text-xl text-orange-400"></FaTrashAlt>
+          </button>
         </th>
       </tr>
+        )
+      }
+      
      
     </tbody>
     
